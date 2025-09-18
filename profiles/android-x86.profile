@@ -7,4 +7,4 @@ arch=x86
 compiler.version=14
 
 [tool_requires]
-*: android-ndk/r27c
+*: android-ndk/r28c
