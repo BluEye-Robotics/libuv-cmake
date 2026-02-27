@@ -43,16 +43,24 @@ buildLinux() {
   scripts/build-library.sh linux-x86 linux/x86
 }
 
+buildWindows() {
+  scripts/build-library.sh windows-x64 windows/x64
+}
+
 set -e
 
 cd "$(dirname "$0")"
 
 rm -rf lib include
 
-buildiOS
-buildAndroid
-buildMacOS
-buildLinux
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OS" == "Windows_NT" ]]; then
+  buildWindows
+else
+  buildiOS
+  buildAndroid
+  buildMacOS
+  buildLinux
+fi
 
 if [[ $1 == "--package" ]]; then
   zip -r package.zip include lib
