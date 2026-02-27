@@ -4,5 +4,5 @@ include(default)
 os=Windows
 arch=armv8
 compiler=msvc
-compiler.version=194
+compiler.version=195
 compiler.runtime=static
