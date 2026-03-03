@@ -45,6 +45,7 @@ buildLinux() {
 
 buildWindows() {
   scripts/build-library.sh windows-x64 windows/x64
+  scripts/build-library.sh windows-arm64 windows/arm64
 
   # Normalize: CMake links 'uv' which expects uv.lib, but Conan produces libuv.lib
   for dir in lib/windows/*/; do
