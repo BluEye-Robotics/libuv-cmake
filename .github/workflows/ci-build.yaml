@@ -4,16 +4,17 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build-unix:
+  build-apple-android:
     runs-on: macos-15
     steps:
       - name: Install dependencies
         run: |
           brew update
           brew install conan
-          brew install greatbridf/musl-cross/musl-cross
           brew cleanup
 
       - name: Set up Conan
@@ -25,15 +26,35 @@ jobs:
 
       - name: Build library
         run: |
-          ./build.sh --package
+          ./build.sh ios android macos
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: package-unix
+          name: package-apple-android
           path: |
             include
             lib
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up ARM64 emulation
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Build Linux libraries
+        run: ./build.sh linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-linux
+          path: lib
 
   build-windows:
     runs-on: windows-latest
@@ -61,14 +82,20 @@ jobs:
             lib
 
   package:
-    needs: [build-unix, build-windows]
+    needs: [build-apple-android, build-linux, build-windows]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Unix artifacts
+      - name: Download Apple/Android artifacts
         uses: actions/download-artifact@v4
         with:
-          name: package-unix
+          name: package-apple-android
           path: output
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: package-linux
+          path: output/lib
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4

@@ -39,9 +39,24 @@ buildMacOS() {
 }
 
 buildLinux() {
-  scripts/build-library.sh linux-armv8 linux/armv8
-  scripts/build-library.sh linux-x86 linux/x86
+  buildLinuxLibraries linux-armv8 linux/armv8 linux/arm64
+  buildLinuxLibraries linux-x86 linux/x86 linux/amd64
 }
+
+buildLinuxLibraries() (
+  # Match the Ubuntu/glibc ABI used by Surge's OpenSSL Linux archives.
+  # Separate images retain each architecture's compiler and Conan build profile.
+  IMAGE="blueye-libuv-builder:$1"
+  docker build --platform "$3" -f linux-dockerfile -t "$IMAGE" .
+  CONTAINER=$(docker create --platform "$3" "$IMAGE" scripts/build-library.sh "$1" "$2")
+  trap 'docker rm -f "$CONTAINER" >/dev/null' EXIT
+  docker start --attach "$CONTAINER"
+  mkdir -p "lib/$2"
+  docker cp "$CONTAINER:/libuv-cmake/lib/$2/." "lib/$2"
+  if [[ ! -d include ]]; then
+    docker cp "$CONTAINER:/libuv-cmake/include" include
+  fi
+)
 
 buildWindows() {
   scripts/build-library.sh windows-x64 windows/x64

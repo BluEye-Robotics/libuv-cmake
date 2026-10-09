@@ -1,0 +1,6 @@
+.git
+build
+include
+lib
+*.zip
+**/__pycache__

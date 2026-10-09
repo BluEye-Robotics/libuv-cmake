@@ -1,0 +1,4 @@
+sources:
+  "1.53.0":
+    url: "https://dist.libuv.org/dist/v1.53.0/libuv-v1.53.0.tar.gz"
+    sha256: "cb0d6dd2128d5a95bd242c6cc982a24fe608fa93da57b6b4ec763b0018c53e64"

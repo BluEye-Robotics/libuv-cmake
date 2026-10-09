@@ -1,40 +1,40 @@
 #!/bin/bash
 
+set -eo pipefail
+cd "$(dirname "$0")"
+
 REPO_ID="BluEye-Robotics/libuv-cmake"
 
 getReleaseDownloadUrl() {
-  RELEASE="latest"
-  if [ -n "$1" ]; then
-    RELEASE="tags/$1"
-  fi
+  RELEASE="tags/$1"
 
   if [ -n "$TOKEN" ]
   then
-    curl --silent --header "authorization: Bearer $TOKEN" "https://api.github.com/repos/$REPO_ID/releases/$RELEASE" |
+    curl --fail --silent --show-error --header "authorization: Bearer $TOKEN" "https://api.github.com/repos/$REPO_ID/releases/$RELEASE" |
         grep '"browser_download_url":' |
         sed -E 's/.*"([^"]+)".*/\1/'
   else
-    curl --silent "https://api.github.com/repos/$REPO_ID/releases/$RELEASE" |
+    curl --fail --silent --show-error "https://api.github.com/repos/$REPO_ID/releases/$RELEASE" |
         grep '"browser_download_url":' |
         sed -E 's/.*"([^"]+)".*/\1/'
   fi
 }
 
 TOKEN=$1
-GIT_TAG=$(git describe --tags --exact-match)
-if [ $? != 0 ]; then
-  GIT_TAG=""
+# Branch checkouts must use this version, even before its release is published.
+# An exact tag can select a later packaging revision of the same dependency.
+GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "v1.53.0")
+if ! DOWNLOAD_URL=$(getReleaseDownloadUrl "$GIT_TAG"); then
+  echo "Cannot download libuv release $GIT_TAG. Publish it first or run ./build.sh." >&2
+  exit 1
 fi
 
-set -e
-
-cd "$(dirname "$0")"
-
-DOWNLOAD_URL=`getReleaseDownloadUrl $GIT_TAG`
-
-rm -rf include/*
-rm -rf lib/*
-
-curl -L "${DOWNLOAD_URL}" -o "/tmp/release.zip"
-unzip "/tmp/release.zip" -d .
-
+# Keep existing libraries intact if the release is unavailable or incomplete.
+DOWNLOAD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/libuv-download.XXXXXX")
+trap 'rm -rf "$DOWNLOAD_DIR"' EXIT
+curl --fail --location "$DOWNLOAD_URL" -o "$DOWNLOAD_DIR/release.zip"
+unzip -q "$DOWNLOAD_DIR/release.zip" -d "$DOWNLOAD_DIR/package"
+test -f "$DOWNLOAD_DIR/package/include/uv.h"
+test -d "$DOWNLOAD_DIR/package/lib"
+rm -rf include lib
+mv "$DOWNLOAD_DIR/package/include" "$DOWNLOAD_DIR/package/lib" .

@@ -2,7 +2,7 @@ include(default)
 
 [settings]
 os=Android
-os.api_level=26
+os.api_level=28
 arch=x86
 compiler.version=14
 

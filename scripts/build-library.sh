@@ -20,6 +20,8 @@ fi
 mkdir -p ${OUTPUT_LIB_DIR}
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
+# Keep the pinned recipe available even before Conan Center carries this version.
+conan export "${SCRIPT_DIR}/../recipes/libuv" --user=blueye --channel=stable
 conan install .. $PROFILE_PARAMS --build=missing
 cd ${SCRIPT_DIR}
 

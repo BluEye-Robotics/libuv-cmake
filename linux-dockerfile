@@ -1,0 +1,12 @@
+FROM ubuntu:24.04
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y build-essential cmake python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/conan \
+    && /opt/conan/bin/pip install --no-cache-dir 'conan>=2.30,<3'
+ENV PATH="/opt/conan/bin:${PATH}"
+RUN conan profile detect
+
+WORKDIR /libuv-cmake
+COPY . .
