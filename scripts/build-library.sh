@@ -14,6 +14,8 @@ if [[ -n "$2" ]]; then
 fi
 
 if [[ "$PROFILE" == *"android"* ]]; then
+  # Conan Center does not yet publish NDK r30; export the pinned upstream recipe.
+  conan export "${SCRIPT_DIR}/../recipes/android-ndk" --version=r30 --user=blueye --channel=stable
   PROFILE_PARAMS="--profile:host ../profiles/$PROFILE.profile --profile:build default"
 fi
 

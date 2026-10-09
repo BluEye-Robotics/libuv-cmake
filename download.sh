@@ -23,7 +23,7 @@ getReleaseDownloadUrl() {
 TOKEN=$1
 # Branch checkouts must use this version, even before its release is published.
 # An exact tag can select a later packaging revision of the same dependency.
-GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "v1.53.0")
+GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "v1.53.0-1")
 if ! DOWNLOAD_URL=$(getReleaseDownloadUrl "$GIT_TAG"); then
   echo "Cannot download libuv release $GIT_TAG. Publish it first or run ./build.sh." >&2
   exit 1

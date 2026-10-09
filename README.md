@@ -14,7 +14,11 @@ version, so builds export the pinned recipe in `recipes/libuv` as
 distribution site and verified against the SHA-256 in `conandata.yml`. See the
 recipe's README for its upstream revision and local changes.
 
-`download.sh` uses the checkout's exact release tag, or `v1.53.0` for an untagged
+Android builds use NDK r30 (Clang 21), with API 28 as the minimum for all four
+ABIs. Until Conan Center publishes r30, the build exports the checksum-pinned
+upstream recipe in `recipes/android-ndk` as `android-ndk/r30@blueye/stable`.
+
+`download.sh` uses the checkout's exact release tag, or `v1.53.0-1` for an untagged
 checkout. It fails without replacing existing libraries if that release is not
 yet available; build from source until the matching binaries are published.
 
